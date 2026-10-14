@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>[hidden]{display:none!important} body{margin:0}</style>
+<title>HDT Recommendation Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+  /* Layout: one centered survey column; each question is its own panel, revealed in sequence. */
+  :root {
+    --font: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --text: #1f2933;
+    --muted: #5b6878;
+    --border: #cbd4de;
+    --bg: #f3f5f8;
+    --card: #ffffff;
+    --field-ro: #eef1f5;
+    --accent: #1d4f91;
+    --accent-hover: #163d70;
+    --accent-fg: #ffffff;
+    --header-bg: #e6edf6;
+    --row-alt: #f8fafc;
+    --row-done: #eef4fb;
+    --error: #b42318;
+    --ok: #127a46;
+    --note-bg: #fff8e6;
+    --note-border: #ecd08a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --text: #e4e9ef;
+      --muted: #9ba7b5;
+      --border: #364352;
+      --bg: #12161c;
+      --card: #1b2129;
+      --field-ro: #232b35;
+      --accent: #7aaaf0;
+      --accent-hover: #9cc0f5;
+      --accent-fg: #0c1624;
+      --header-bg: #22324a;
+      --row-alt: #1f262f;
+      --row-done: #1f2d40;
+      --error: #f2948a;
+      --ok: #62d39c;
+      --note-bg: #2c2615;
+      --note-border: #6a5824;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --text: #e4e9ef;
+    --muted: #9ba7b5;
+    --border: #364352;
+    --bg: #12161c;
+    --card: #1b2129;
+    --field-ro: #232b35;
+    --accent: #7aaaf0;
+    --accent-hover: #9cc0f5;
+    --accent-fg: #0c1624;
+    --header-bg: #22324a;
+    --row-alt: #1f262f;
+    --row-done: #1f2d40;
+    --error: #f2948a;
+    --ok: #62d39c;
+    --note-bg: #2c2615;
+    --note-border: #6a5824;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    font-size: 16px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding-block: 32px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .mockup-note {
+    background: var(--note-bg);
+    border: 1px solid var(--note-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  .mockup-note code { font-weight: 700; letter-spacing: 0.05em; }
+  h1 { font-size: 1.45rem; margin: 4px 0 0; text-wrap: balance; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    min-width: 0;
+  }
+  .q-label { font-weight: 700; display: block; margin-bottom: 10px; }
+  .code-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input[type="text"] {
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 220px;
+    max-width: 100%;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--card);
+    color: var(--text);
+  }
+  input[type="text"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[type="text"][readonly] { background: var(--field-ro); color: var(--muted); }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-fg);
+    cursor: pointer;
+  }
+  button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.secondary { background: var(--card); color: var(--accent); }
+  button.secondary:hover { background: var(--header-bg); }
+  .msg { margin: 8px 0 0; font-size: 0.95rem; }
+  .msg.error { color: var(--error); }
+  .msg.ok { color: var(--ok); font-weight: 600; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid var(--border); padding: 12px 14px; vertical-align: middle; }
+  thead th { background: var(--header-bg); text-align: left; font-weight: 700; }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  tbody tr.answered { background: var(--row-done); }
+  td.choice { width: 96px; text-align: center; white-space: nowrap; }
+  td.choice label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  input[type="radio"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .lasid { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    min-height: 44px;
+  }
+  .progress { color: var(--muted); font-size: 0.95rem; }
+
+  .confirmation h2 { font-size: 1.15rem; margin: 0 0 8px; color: var(--ok); }
+  .confirmation table { margin: 12px 0 16px; max-width: 420px; }
+
+  @media (max-width: 560px) {
+    .card { padding: 16px; }
+    th, td { padding: 10px 8px; }
+    td.choice { width: 70px; }
+    td.choice label { padding: 4px 2px; gap: 6px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="mockup-note">Mockup for review. Test code: <code>ABCDEFG</code>. Responses are not saved.</div>
+
+  <h1>High Dosage Tutoring Recommendations</h1>
+
+  <!-- Question 1: access code -->
+  <section class="card" id="q1">
+    <form id="code-form" novalidate>
+      <label class="q-label" for="code">Please enter the code you were given.</label>
+      <div class="code-row">
+        <input type="text" id="code" name="code" autocomplete="off" spellcheck="false" maxlength="20" aria-describedby="code-msg">
+        <button type="submit" id="code-btn">Continue</button>
+      </div>
+      <p class="msg" id="code-msg" role="status" hidden></p>
+    </form>
+  </section>
+
+  <!-- Question 2: student recommendations (revealed after a valid code) -->
+  <section class="card" id="q2" aria-live="polite" hidden>
+    <form id="hdt-form" novalidate>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="3" scope="colgroup" id="q2-text">
+                You were asked to speak with the teachers of eight students about whether those students should be
+                recommended for high dosage tutoring (HDT). Please indicate the teachers' opinion about each student
+                whose LASID is listed below.
+              </th>
+            </tr>
+          </thead>
+          <tbody id="q2-rows"></tbody>
+        </table>
+      </div>
+      <div class="footer-row">
+        <span class="progress" id="progress"></span>
+        <button type="submit" id="submit-btn" hidden>Submit</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Confirmation -->
+  <section class="card confirmation" id="done" aria-live="polite" hidden>
+    <h2>Thank you. Your responses have been submitted.</h2>
+    <p>Summary of what would be recorded for code <span class="lasid" id="done-code"></span>:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">LASID</th><th scope="col">Recommended for HDT</th></tr></thead>
+        <tbody id="done-rows"></tbody>
+      </table>
+    </div>
+    <button type="button" class="secondary" id="reset-btn">Reset mockup</button>
+  </section>
+</main>
+
+<script>
+  // In a live survey, each code would pull that teacher's own list of students.
+  const ROSTERS = {
+    ABCDEFG: ["1234567", "2345678", "3456789", "4567890", "5678901", "6789012", "7890123", "8901234"]
+  };
+
+  const q1        = document.getElementById("q1");
+  const codeForm  = document.getElementById("code-form");
+  const codeInput = document.getElementById("code");
+  const codeBtn   = document.getElementById("code-btn");
+  const codeMsg   = document.getElementById("code-msg");
+  const q2        = document.getElementById("q2");
+  const hdtForm   = document.getElementById("hdt-form");
+  const rowsBody  = document.getElementById("q2-rows");
+  const progress  = document.getElementById("progress");
+  const submitBtn = document.getElementById("submit-btn");
+  const done      = document.getElementById("done");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let activeCode = null;
+  let roster = [];
+
+  function showMsg(text, kind) {
+    codeMsg.textContent = text;
+    codeMsg.className = "msg " + kind;
+    codeMsg.hidden = false;
+  }
+
+  function reveal(el) {
+    el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  function tryCode(showErrors) {
+    const code = codeInput.value.trim().toUpperCase();
+    if (ROSTERS[code]) {
+      acceptCode(code);
+    } else if (showErrors) {
+      showMsg(code ? "That code wasn't recognized. Check it and try again." : "Enter the code you were given.", "error");
+    }
+  }
+
+  function acceptCode(code) {
+    activeCode = code;
+    roster = ROSTERS[code];
+    codeInput.value = code;
+    codeInput.readOnly = true;
+    codeBtn.hidden = true;
+    showMsg("Code accepted.", "ok");
+    buildRows();
+    q2.hidden = false;
+    reveal(q2);
+  }
+
+  function buildRows() {
+    rowsBody.innerHTML = "";
+    roster.forEach((lasid, i) => {
+      const qid = "row-q-" + (i + 1);
+      const name = "hdt_" + lasid;
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td id="' + qid + '">Should the student with LASID <span class="lasid">' + lasid + '</span> be recommended for HDT?</td>' +
+        '<td class="choice"><label><input type="radio" id="' + name + '_no" name="' + name + '" value="No" aria-describedby="' + qid + '"> No</label></td>' +
+        '<td class="choice"><label><input type="radio" id="' + name + '_yes" name="' + name + '" value="Yes" aria-describedby="' + qid + '"> Yes</label></td>';
+      rowsBody.appendChild(tr);
+    });
+    updateProgress();
+  }
+
+  function answers() {
+    return roster.map(lasid => {
+      const checked = hdtForm.querySelector('input[name="hdt_' + lasid + '"]:checked');
+      return { lasid, value: checked ? checked.value : null };
+    });
+  }
+
+  function updateProgress() {
+    const a = answers();
+    const n = a.filter(x => x.value).length;
+    rowsBody.querySelectorAll("tr").forEach((tr, i) => tr.classList.toggle("answered", !!a[i].value));
+    const complete = n === roster.length;
+    progress.textContent = complete
+      ? "All " + roster.length + " students answered."
+      : n + " of " + roster.length + " students answered.";
+    submitBtn.hidden = !complete;
+  }
+
+  codeForm.addEventListener("submit", e => { e.preventDefault(); tryCode(true); });
+  codeInput.addEventListener("input", () => {
+    codeMsg.hidden = true;
+    tryCode(false); // reveal as soon as a valid code is typed
+  });
+
+  hdtForm.addEventListener("change", updateProgress);
+
+  hdtForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const a = answers();
+    if (a.some(x => !x.value)) return;
+    // A live survey would send { code: activeCode, responses: a } to the server here.
+    document.getElementById("done-code").textContent = activeCode;
+    document.getElementById("done-rows").innerHTML = a
+      .map(x => '<tr><td class="lasid">' + x.lasid + "</td><td>" + x.value + "</td></tr>")
+      .join("");
+    q1.hidden = true;
+    q2.hidden = true;
+    done.hidden = false;
+    reveal(done);
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    activeCode = null;
+    roster = [];
+    rowsBody.innerHTML = "";
+    codeInput.value = "";
+    codeInput.readOnly = false;
+    codeBtn.hidden = false;
+    codeMsg.hidden = true;
+    submitBtn.hidden = true;
+    done.hidden = true;
+    q2.hidden = true;
+    q1.hidden = false;
+    codeInput.focus();
+  });
+</script>
+</body>
+</html>
